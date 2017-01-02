@@ -17,6 +17,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+#include <stdbool.h>
 
     //#define DUMP_WILDCARD_RATIO
     //#define DUMP_DIVERSITY_INDEX
@@ -30,9 +32,10 @@ extern "C" {
     //#define DEBUG_GENETIC
 
 #define nb_chroms     16
-#define nb_iterations 100
+#define nb_iterations 25
 #define nb_mutation   max((0.1 * nb_ebit * nb_chroms), 1)
 
+    void evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result);
     void rule_programming_mc_sbc(void);
     void rule_programming_genetic(void);
 

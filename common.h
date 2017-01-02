@@ -23,6 +23,9 @@ extern "C" {
     //#define DUMP_RULES
     //#define DUMP_RULES_STR
 
+#define NB_BITS_EBS1  4
+#define threshold_factor 0.9
+
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
