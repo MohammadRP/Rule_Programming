@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /* 
  * File:   common.h
  * Author: mrp
@@ -20,37 +14,62 @@ extern "C" {
 
 #include <stdint.h>
 
+    /* Debug Options ******************************************************** */
     //#define DUMP_RULES
     //#define DUMP_RULES_STR
 
-#define NB_BITS_EBS1  4
-#define threshold_factor 0.9
+    //#define DUMP_WILDCARD_RATIO
+    //#define DUMP_DIVERSITY_INDEX
+    //#define DUMP_INDEPENDENCE_INDEX
+    //#define DUMP_SELECTION_FACTOR
+    //#define DUMP_SELECTED_EBS
+
+    //#define DUMP_EVALUATE
+    //#define DUMP_SELECT
+    //#define DUMP_CHROMS
+    //#define DEBUG_GENETIC
+
+
+    /* General Parameters *************************************************** */
+#define NB_BITS_EBS1  14
+
+    /* MC-SBC Parameters **************************************************** */
+#define threshold_factor_wr 0.9
+#define threshold_factor_di 0.9
+#define threshold_factor_ii 0.9
+
+    /* Genetic Parameters *************************************************** */
+#define nb_chroms     16
+#define nb_iterations 100
+#define nb_mutation   max((0.2 * nb_ebit * nb_chroms), 1)
+
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a > _b ? _a : _b; })
 
+    /* Rule Set Parameters ************************************************** */
 #ifdef DUMP_RULES_STR
 #define RULE_LEN   (356+14)
 #else
 #define RULE_LEN   356
 #endif
-#define INGRESS_PORT_LEN 32
-#define METADATA_LEN  64
-#define ETH_SRC_LEN   48
-#define ETH_DST_LEN   48
-#define ETHER_TYPE_LEN  16
-#define VID_LEN    12
-#define VPRTY_LEN   3
-#define TOS_LEN    6
-#define MPLS_LBL_LEN  20
-#define MPLS_TFC_LEN  3
-#define IP_SRC_LEN   32
-#define IP_DST_LEN   32
-#define PROTO_LEN   8
-#define PORT_SRC_LEN  16
-#define PORT_DST_LEN  16
+#define INGRESS_PORT_LEN    32
+#define METADATA_LEN        64
+#define ETH_SRC_LEN         48
+#define ETH_DST_LEN         48
+#define ETHER_TYPE_LEN      16
+#define VID_LEN             12
+#define VPRTY_LEN           3
+#define TOS_LEN             6
+#define MPLS_LBL_LEN        20
+#define MPLS_TFC_LEN        3
+#define IP_SRC_LEN          32
+#define IP_DST_LEN          32
+#define PROTO_LEN           8
+#define PORT_SRC_LEN        16
+#define PORT_DST_LEN        16
 
     typedef struct ip {
         uint8_t bytes[4];

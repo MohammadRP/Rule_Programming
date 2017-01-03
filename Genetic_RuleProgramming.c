@@ -27,7 +27,9 @@ void dump_chrom(chrom_t _chrom);
  * Rule Programming via genetic algorithm ----------------------------------------------------
  */
 void rule_programming_genetic(void) {
+    printf("Starting Genetic rule programming ...\n");
     find_effective_bits(rules, NB_BITS_EBS1);
+    printf("Done.\n\n");
 }
 
 void find_effective_bits(rule_t *rules, int nb_eb) {
@@ -93,7 +95,7 @@ void find_effective_bits(rule_t *rules, int nb_eb) {
         getchar();
 #endif
     }
-    m_evaluate(rules_str, &best_chrom, true);
+    evaluate(rules_str, &best_chrom, false);
 }
 
 float get_variance(int *data, int num) {

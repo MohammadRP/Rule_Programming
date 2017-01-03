@@ -44,24 +44,30 @@ void rule_programming_mc_sbc(void) {
 
     // Get Wildcard Ratio
     get_wildcard_ratio();
-    wildcard_ratio_threshold = (1 - threshold_factor) * max_wildcard_ratio;
-    printf("Wildcard Ratio calculated. th=%lf\n", wildcard_ratio_threshold);
+    wildcard_ratio_threshold = (1 - threshold_factor_wr) * max_wildcard_ratio;
+#ifdef DEBUG_MCSBC
+    printf("Wildcard Ratio calculated: MAX=%lf THRESHOLD=%lf\n", max_wildcard_ratio, wildcard_ratio_threshold);
+#endif
 
     // Get Diversity Index
     get_diversity_index();
-    diversity_index_threshold = threshold_factor * max_diversity_index;
-    printf("Diversity index calculated. th=%lf\n", diversity_index_threshold);
+    diversity_index_threshold = threshold_factor_di * max_diversity_index;
+#ifdef DEBUG_MCSBC
+    printf("Diversity index calculated: MAX=%lf THRESHOLD=%lf\n", max_diversity_index, diversity_index_threshold);
+#endif
 
     // Get Independence Index
     get_independence_index();
-    independence_index_threshold = (1 - threshold_factor)
-            * max_independence_index;
-    printf("independence_index calculated. th=%lf\n", independence_index_threshold);
+    independence_index_threshold = (1 - threshold_factor_ii) * max_independence_index;
+#ifdef DEBUG_MCSBC
+    printf("independence_index calculated: MAX=%lf THRESHOLD=%lf\n", max_independence_index, independence_index_threshold);
+#endif
 
     // Generate Selection Factor
     generate_selection_factor();
+#ifdef DEBUG_MCSBC
     printf("selection factor generated.\n");
-
+#endif
     EBS_t eff_bit_sets[1];
     // EBS 0
     eff_bit_sets[0].nb_bits = NB_BITS_EBS1;
@@ -93,7 +99,7 @@ void rule_programming_mc_sbc(void) {
     chrom.position = (int *) malloc(chrom.nb_eb * sizeof (int));
     for (i = 0; i < chrom.nb_eb; i++)
         chrom.position[i] = eff_bit_sets[0].bits[i];
-    evaluate(rules_str, &chrom, true);
+    evaluate(rules_str, &chrom, false);
 
     printf("Done.\n\n");
 }
@@ -151,8 +157,11 @@ void get_diversity_index(void) {
         pi_zero = (double) nb_zero / (double) nb_rules;
         pi_star = (double) nb_star / (double) nb_rules;
         diversity_index[i] = 0
-                - ((pi_zero / (1 - pi_star)) * log(pi_zero / (1 - pi_star)))
-                - ((pi_one / (1 - pi_star)) * log(pi_one / (1 - pi_star)));
+                - ((pi_zero / (1 - pi_star)) * log10(pi_zero / (1 - pi_star)))
+                - ((pi_one / (1 - pi_star)) * log10(pi_one / (1 - pi_star)));
+        if (diversity_index[i] != diversity_index[i]) { // check for nan
+            diversity_index[i] = 0;
+        }
         if (max_diversity_index < diversity_index[i])
             max_diversity_index = diversity_index[i];
     }
@@ -178,6 +187,10 @@ void get_independence_index(void) {
         for (j = 0; j < RULE_LEN; j++) {
             // i & j
             independence_index[i][j] = 0;
+            if (i == j) {
+                independence_index[i][j] = 10; // much greater than normal values
+                continue;
+            }
             for (x = 0; x < 3; x++) {
                 for (y = 0; y < 3; y++) {
                     double n_xy = 0, n_x = 0, n_y = 0;
@@ -229,23 +242,22 @@ void generate_selection_factor(void) {
             selection_factor[i][j] = alpha * (1 - wildcard_ratio[i][j])
                     + beta * diversity_index[i]
                     + gamma * (1 - independence_index[i][j]);
-        }
-    }
 #ifdef DUMP_SELECTION_FACTOR
-    printf("\nCalculated Selection Factor:\n");
-    sleep(2);
-    for (i = 0; i < RULE_LEN; i++) {
-        for (j = 0; j < RULE_LEN; j++) {
-            printf("bits (%-2d,%-2d) --> %lf\n", i, j, selection_factor[i][j]);
+            printf("%d,%d\twr=%lf di=%lf ii=%lf sf=%lf\n",
+                    i, j,
+                    wildcard_ratio[i][j],
+                    diversity_index[i],
+                    independence_index[i][j],
+                    selection_factor[i][j]);
+#endif
         }
     }
-#endif
 }
 
 void select_effective_bits(EBS_t *ebs, uint8_t nb_ebs) {
-
+#ifdef DEBUG_MCSBC
     printf("Trying to select %d EBS ... \n", nb_ebs);
-
+#endif
     int i, j;
     int bit_vector[RULE_LEN];
     int nb_unused_bits = RULE_LEN;
@@ -255,30 +267,56 @@ void select_effective_bits(EBS_t *ebs, uint8_t nb_ebs) {
         bit_vector[i] = 0;
     }
 
+    for (i = 0, j = 0; i < RULE_LEN; i++) {
+        if (diversity_index[i] < diversity_index_threshold) {
+            bit_vector[i] = 1;
+            j++;
+        }
+    }
+#ifdef DEBUG_MCSBC
+    printf("%d bits marked as used\n", j);
+#endif
+
     // while Unused bits are available do
     int ebs_index = 0;
     while (nb_unused_bits > 0 && ebs_index < nb_ebs) {
+#ifdef DEBUG_MCSBC
         printf("EBS %d: nb_bits=%d\n", ebs_index, ebs[ebs_index].nb_bits);
+#endif
         // for All unused bits in a rule set do
-        for (i = 0; i < RULE_LEN; i++) {
-            if (bit_vector[i] > 0)
-                continue;
+        for (; ebs[ebs_index].top < ebs[ebs_index].nb_bits && nb_unused_bits > 0;) {
             double max_selection_factor = 0;
-            int bit0 = i, bit1 = -1;
-            // find maximum selection factor
-            for (j = 0; j < RULE_LEN; j++) {
-                if (bit_vector[j] > 0)
+            int bit0 = -1, bit1 = -1;
+            for (i = 0; i < RULE_LEN; i++) {
+                if (bit_vector[i] > 0)
                     continue;
-                if (max_selection_factor < selection_factor[i][j]) {
-                    max_selection_factor = selection_factor[i][j];
-                    bit1 = j;
+                // find maximum selection factor
+                for (j = 0; j < RULE_LEN; j++) {
+                    if (bit_vector[j] > 0 || i == j)
+                        continue;
+                    if (max_selection_factor < selection_factor[i][j]) {
+                        max_selection_factor = selection_factor[i][j];
+                        bit0 = i;
+                        bit1 = j;
+                    }
                 }
             }
 
+            if (bit0 == -1 || bit1 == -1) {
+                printf("MC-SBC could not find requested EBS\n");
+                exit(EXIT_FAILURE);
+            }
+#ifdef DEBUG_MCSBC
+            printf("%d,%d --> wr=%lf di=%lf ii=%lf\n",
+                    bit0, bit1,
+                    wildcard_ratio[bit0][bit1],
+                    diversity_index[bit0],
+                    independence_index[bit0][bit1]);
+#endif
             if (wildcard_ratio[bit0][bit1] < wildcard_ratio_threshold
-                    && diversity_index[bit0] > diversity_index_threshold
-                    && independence_index[bit0][bit1]
-                    < independence_index_threshold) {
+                    // && diversity_index[bit0] > diversity_index_threshold
+                    // && diversity_index[bit1] > diversity_index_threshold
+                    && independence_index[bit0][bit1] < independence_index_threshold) {
                 // Append Ri , Rj to current EBS;
                 ebs[ebs_index].bits[ebs[ebs_index].top++] = bit0;
                 ebs[ebs_index].bits[ebs[ebs_index].top++] = bit1;
@@ -288,6 +326,10 @@ void select_effective_bits(EBS_t *ebs, uint8_t nb_ebs) {
                 nb_unused_bits -= 2;
                 if (ebs[ebs_index].top >= ebs[ebs_index].nb_bits)
                     break;
+            } else {
+                bit_vector[bit0] = 1;
+                bit_vector[bit1] = 1;
+                nb_unused_bits -= 2;
             }
         }
 #ifdef DUMP_SELECTED_EBS

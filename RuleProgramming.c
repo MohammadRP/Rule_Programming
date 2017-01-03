@@ -21,7 +21,7 @@ void n_dump_chrom(chrom_t _chrom) {
     for (i = 0; i < _chrom.nb_eb; i++) {
         printf("%-3d ", _chrom.position[i]);
     }
-    printf(")\tscore:%f\n", _chrom.score);
+    printf(")\n");
 }
 
 float variance(int *data, int num) {
@@ -107,23 +107,18 @@ void evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result) {
     float dup_ratio = dup / (float) nb_rules;
     chrom->score = fitness(var, dup_ratio);
 
+    printf("------------------------------------------\n");
+    n_dump_chrom(*chrom);
+    printf("nb_dup    = %d\n", dup);
+    printf("dup_ratio = %f\n", dup_ratio);
+    printf("variance  = %f\n", var);
+    printf("score     = %f\n", chrom->score);
+    printf("------------------------------------------\n");
+
     if (show_result) {
-        n_dump_chrom(*chrom);
         printf("nb_rules = ");
         for (i = 0; i < nb_grp; i++) {
             printf("%d ", nb_next_level_rules[i]);
         }
-        printf("\tnb_dup = %d\t", dup);
-        printf("var = %f\tdup_ratio = %f\n\n\n", var, dup_ratio);
-    } else {
-#ifdef DUMP_EVALUATE
-        n_dump_chrom(*chrom);
-        printf("nb_rules = ");
-        for (i = 0; i < nb_grp; i++) {
-            printf("%d ", nb_next_level_rules[i]);
-        }
-        printf("\tnb_dup = %d\t", dup);
-        printf("var = %f\tdup_ratio = %f\n\n\n", var, dup_ratio);
-#endif
     }
 }
