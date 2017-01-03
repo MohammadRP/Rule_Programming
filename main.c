@@ -31,28 +31,74 @@
  */
 int main(int argc, char** argv) {
 
+    int i;
     struct timespec start, end;
-    double diff;
+    double elapsed_time;
 
     parse_args(argc, argv);
     init();
 
     if (alg & ALG_MCSBC) {
+
+        /*
+         * Initialize Effective Bit Sets
+         */
+        EBS_t eff_bit_sets[2];
+        init_ebs(eff_bit_sets, 2);
+
+        /*
+         * Get Start Time of Execution
+         */
         clock_gettime(CLOCK_REALTIME, &start);
-        rule_programming_mc_sbc();
+
+        /*
+         * Start MC-SBC
+         */
+        rule_programming_mc_sbc(eff_bit_sets, 2);
+
+        /*
+         * Get End Time of Execution and Calculate Elapsed Time
+         */
         clock_gettime(CLOCK_REALTIME, &end);
-        diff = (end.tv_sec - start.tv_sec) * 1e3 +
+        elapsed_time = (end.tv_sec - start.tv_sec) * 1e3 +
                 (end.tv_nsec - start.tv_nsec) / 1e6;
-        printf("MC-SBC takes %.2lf ms\n", diff);
+        printf("MC-SBC takes %.2lf ms\n", elapsed_time);
+
+        /*
+         * Evaluate Results
+         */
+        evaluate_new(rules_str, eff_bit_sets, 2);
     }
 
     if (alg & ALG_GENETIC) {
+        /*
+         * Initialize Effective Bit Sets
+         */
+        EBS_t eff_bit_sets[2];
+        init_ebs(eff_bit_sets, 2);
+
+        /*
+         * Get Start Time of Execution
+         */
         clock_gettime(CLOCK_REALTIME, &start);
-        rule_programming_genetic();
+
+        /*
+         * Start Genetic
+         */
+        rule_programming_genetic(eff_bit_sets, 2);
+
+        /*
+         * Get End Time of Execution and Calculate Elapsed Time
+         */
         clock_gettime(CLOCK_REALTIME, &end);
-        diff = (end.tv_sec - start.tv_sec) * 1e3 +
+        elapsed_time = (end.tv_sec - start.tv_sec) * 1e3 +
                 (end.tv_nsec - start.tv_nsec) / 1e6;
-        printf("Genetic takes %.2lf ms\n", diff);
+        printf("Genetic takes %.2lf ms\n", elapsed_time);
+
+        /*
+         * Evaluate Results
+         */
+        evaluate_new(rules_str, eff_bit_sets, 2);
     }
 
     return (EXIT_SUCCESS);

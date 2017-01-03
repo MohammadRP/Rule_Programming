@@ -39,7 +39,7 @@ void get_independence_index(void);
 void generate_selection_factor(void);
 void select_effective_bits(EBS_t *ebs, uint8_t nb_ebs);
 
-void rule_programming_mc_sbc(void) {
+void rule_programming_mc_sbc(EBS_t *ebss, int nb_ebs) {
     printf("Starting MC_SBC rule programming ...\n");
 
     // Get Wildcard Ratio
@@ -68,38 +68,8 @@ void rule_programming_mc_sbc(void) {
 #ifdef DEBUG_MCSBC
     printf("selection factor generated.\n");
 #endif
-    EBS_t eff_bit_sets[1];
-    // EBS 0
-    eff_bit_sets[0].nb_bits = NB_BITS_EBS1;
-    eff_bit_sets[0].bits = (int *) malloc(
-            eff_bit_sets[0].nb_bits * sizeof (int));
-    int i;
-    for (i = 0; i < eff_bit_sets[0].nb_bits; i++)
-        eff_bit_sets[0].bits[i] = 0;
-    eff_bit_sets[0].top = 0;
-
-#if 0
-    // EBS 1
-    eff_bit_sets[1].nb_bits = 10;
-    eff_bit_sets[1].bits = (int *) malloc(
-            eff_bit_sets[1].nb_bits * sizeof (int));
-    for (i = 0; i < eff_bit_sets[1].nb_bits; i++)
-        eff_bit_sets[1].bits[i] = 0;
-    eff_bit_sets[1].top = 0;
-
-    // Select Effective Bits
-    select_effective_bits(eff_bit_sets, 2);
-#else
-    select_effective_bits(eff_bit_sets, 1);
-#endif
-
-    chrom_t chrom;
-    chrom.id = 0;
-    chrom.nb_eb = eff_bit_sets[0].nb_bits;
-    chrom.position = (int *) malloc(chrom.nb_eb * sizeof (int));
-    for (i = 0; i < chrom.nb_eb; i++)
-        chrom.position[i] = eff_bit_sets[0].bits[i];
-    evaluate(rules_str, &chrom, false);
+    
+    select_effective_bits(ebss, nb_ebs);
 
     printf("Done.\n\n");
 }

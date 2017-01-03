@@ -44,11 +44,11 @@ extern "C" {
                     break;
                 case 'a':
                     if (strcmp(optarg, "mcsbc") == 0)
-                        alg |= ALG_MCSBC;
+                        alg = ALG_MCSBC;
                     else if (strcmp(optarg, "genetic") == 0)
-                        alg |= ALG_GENETIC;
+                        alg = ALG_GENETIC;
                     else if (strcmp(optarg, "all") == 0)
-                        alg |= (ALG_GENETIC | ALG_MCSBC);
+                        alg = (ALG_GENETIC | ALG_MCSBC);
                     else {
                         printf("Supported algorithms: mcsbc & genetic & all\n");
                         exit(EXIT_FAILURE);
@@ -545,6 +545,26 @@ extern "C" {
 #endif
         }
 
+    }
+
+    void init_ebs(EBS_t *ebs, int nb_ebs) {
+        int i;
+        
+        // EBS 0
+        ebs[0].nb_bits = NB_BITS_EBS1;
+        ebs[0].bits = (int *) malloc(
+                ebs[0].nb_bits * sizeof (int));
+        for (i = 0; i < ebs[0].nb_bits; i++)
+            ebs[0].bits[i] = 0;
+        ebs[0].top = 0;
+        
+        // EBS 1
+        ebs[1].nb_bits = NB_BITS_EBS2;
+        ebs[1].bits = (int *) malloc(
+                ebs[1].nb_bits * sizeof (int));
+        for (i = 0; i < ebs[1].nb_bits; i++)
+            ebs[1].bits[i] = 0;
+        ebs[1].top = 0;
     }
 
 #ifdef __cplusplus

@@ -15,7 +15,7 @@
 #include "common.h"
 #include "RuleProgramming.h"
 
-void find_effective_bits(rule_t *rules, int nb_eb);
+void find_effective_bits(EBS_t *cur_ebs);
 float get_variance(int *data, int num);
 float fitness_function(float variance, float dup_ratio);
 void m_evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result);
@@ -23,16 +23,44 @@ void m_select(chrom_t *chroms, int *sel_chroms);
 chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom);
 void dump_chrom(chrom_t _chrom);
 
+int bit_mask[RULE_LEN];
+
 /*
  * Rule Programming via genetic algorithm ----------------------------------------------------
  */
-void rule_programming_genetic(void) {
+void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
     printf("Starting Genetic rule programming ...\n");
-    find_effective_bits(rules, NB_BITS_EBS1);
+
+    /*
+     * Initialize bit mask
+     */
+    int i;
+    for (i = 0; i < RULE_LEN; i++) {
+        bit_mask[i] = 0;
+    }
+
+    /*
+     * find first ebs
+     */
+    find_effective_bits(&ebs[0]);
+
+    /*
+     * mark ebs[0].bits as used in bit mask
+     */
+    for (i = 0; i < ebs[0].nb_bits; i++) {
+        bit_mask[ebs[0].bits[i]] = 1;
+    }
+
+    /*
+     * find second ebs
+     */
+    find_effective_bits(&ebs[1]);
+
     printf("Done.\n\n");
 }
 
-void find_effective_bits(rule_t *rules, int nb_eb) {
+void find_effective_bits(EBS_t *cur_ebs) {
+    int nb_eb = cur_ebs->nb_bits;
     int i, j, iter;
     chrom_t *chroms;
     int next_chroms[nb_chroms / 2];
@@ -53,7 +81,7 @@ void find_effective_bits(rule_t *rules, int nb_eb) {
         chroms[i].score = 0;
         for (j = 0; j < nb_eb; j++) {
             random = rand() % RULE_LEN;
-            while (bit_vector[random] != 0)
+            while (bit_vector[random] != 0 || bit_mask[random] != 0)
                 random = rand() % RULE_LEN;
             bit_vector[random] = 1;
             chroms[i].position[j] = random;
@@ -95,7 +123,13 @@ void find_effective_bits(rule_t *rules, int nb_eb) {
         getchar();
 #endif
     }
+#if 0
     evaluate(rules_str, &best_chrom, false);
+#endif
+
+    for (i = 0; i < cur_ebs->nb_bits; i++) {
+        cur_ebs->bits[i] = best_chrom.position[i];
+    }
 }
 
 float get_variance(int *data, int num) {
@@ -233,7 +267,7 @@ void m_reproduce(chrom_t *chrom) {
 }
 
 chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
-    int i, mut_i, mut_j;
+    int i, mut_i, mut_j, mut_rand;
     int nb_ebit = chroms[0].nb_eb;
 
     chrom_t * ret_chrom;
@@ -301,7 +335,11 @@ chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
         mut_i = rand() % nb_chroms;
         mut_j = rand() % nb_ebit;
 
-        ret_chrom[mut_i].position[mut_j] = rand() % RULE_LEN;
+        mut_rand = rand() % RULE_LEN;
+        while (bit_mask[mut_rand] != 0)
+            mut_rand = rand() % RULE_LEN;
+
+        ret_chrom[mut_i].position[mut_j] = mut_rand;
     }
 
     free(bit_vector);

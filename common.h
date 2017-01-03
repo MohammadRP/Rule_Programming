@@ -31,7 +31,8 @@ extern "C" {
 
 
     /* General Parameters *************************************************** */
-#define NB_BITS_EBS1  14
+#define NB_BITS_EBS1  6
+#define NB_BITS_EBS2  14
 
     /* MC-SBC Parameters **************************************************** */
 #define threshold_factor_wr 0.9
@@ -149,6 +150,21 @@ extern "C" {
     extern int nb_rules;
     extern rule_t *rules;
     extern rule_str_t *rules_str;
+
+    typedef struct lookup_table_entry {
+        int *rule_id;
+        int nb_rules;
+    } lookup_table_entry_t;
+
+    typedef struct lookup_table {
+        lookup_table_entry_t * entries;
+        int nb_entries;
+    } lookup_table_t;
+
+    typedef struct subset {
+        lookup_table_t *lookup_tables;
+        int nb_tables;
+    } subset_t;
 
 #ifdef __cplusplus
 }
