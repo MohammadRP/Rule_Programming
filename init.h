@@ -20,7 +20,11 @@ extern "C" {
 
 #include "common.h"
 
+#define ALG_MCSBC   1
+#define ALG_GENETIC 2
+
     char *input_file = NULL;
+    int alg = 0;
     int nb_rules;
     rule_t *rules;
     rule_str_t *rules_str;
@@ -33,10 +37,22 @@ extern "C" {
     void parse_args(int argc, char **argv) {
         int c;
         opterr = 0;
-        while ((c = getopt(argc, argv, "f:h")) != -1) {
+        while ((c = getopt(argc, argv, "f:a:h")) != -1) {
             switch (c) {
                 case 'f':
                     input_file = strdup(optarg);
+                    break;
+                case 'a':
+                    if (strcmp(optarg, "mcsbc") == 0)
+                        alg |= ALG_MCSBC;
+                    else if (strcmp(optarg, "genetic") == 0)
+                        alg |= ALG_GENETIC;
+                    else if (strcmp(optarg, "all") == 0)
+                        alg |= (ALG_GENETIC | ALG_MCSBC);
+                    else {
+                        printf("Supported algorithms: mcsbc & genetic & all\n");
+                        exit(EXIT_FAILURE);
+                    }
                     break;
                 case '?':
                 case 'h':
