@@ -107,8 +107,16 @@ void evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result) {
     float dup_ratio = dup / (float) nb_rules;
     chrom->score = fitness(var, dup_ratio);
 
+    // Calculate Binch
+    int binch = 0;
+    for (i = 0; i < nb_grp; i++) {
+        if (binch < nb_next_level_rules[i])
+            binch = nb_next_level_rules[i];
+    }
+
     printf("------------------------------------------\n");
     n_dump_chrom(*chrom);
+    printf("binch     = %d\n", binch);
     printf("nb_dup    = %d\n", dup);
     printf("dup_ratio = %f\n", dup_ratio);
     printf("variance  = %f\n", var);
