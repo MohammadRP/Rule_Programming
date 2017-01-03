@@ -24,7 +24,7 @@ extern "C" {
 #define ALG_GENETIC 2
 
     char *input_file = NULL;
-    int alg = 0;
+    int alg = ALG_GENETIC | ALG_MCSBC;
     int nb_rules;
     rule_t *rules;
     rule_str_t *rules_str;
