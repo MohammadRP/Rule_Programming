@@ -24,6 +24,7 @@ chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom);
 void dump_chrom(chrom_t _chrom);
 
 int bit_mask[RULE_LEN];
+int nb_chroms;
 
 /*
  * Rule Programming via genetic algorithm ----------------------------------------------------
@@ -63,9 +64,12 @@ void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
 
 void find_effective_bits(EBS_t *cur_ebs) {
     int nb_eb = cur_ebs->nb_bits;
+    nb_chroms = NB_CHROMS; // should be after than nb_eb
+    
     int i, j, iter;
     chrom_t *chroms;
-    int next_chroms[nb_chroms / 2];
+    int *next_chroms;
+    next_chroms = (int *) malloc((nb_chroms/2) * sizeof (int));
     chrom_t best_chrom;
     best_chrom.score = 0; // initail value
 
@@ -94,7 +98,7 @@ void find_effective_bits(EBS_t *cur_ebs) {
     }
 
     iter = 0;
-    while (iter++ < nb_iterations) {
+    while (iter++ < NB_ITERATIONS) {
 #ifdef DEBUG_GENETIC
         printf("iteration %d ...\n\n", iter);
 #endif
@@ -342,7 +346,7 @@ chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
         }
     }
 
-    for (i = 0; i < nb_mutation; i++) {
+    for (i = 0; i < NB_MUTATION; i++) {
         mut_i = rand() % nb_chroms;
         mut_j = rand() % nb_ebit;
 
