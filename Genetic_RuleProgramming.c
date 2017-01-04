@@ -60,7 +60,7 @@ int rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
         find_effective_bits(&ebs[1]);
 
     printf("Done.\n");
-    
+
     return 0;
 }
 
@@ -73,6 +73,7 @@ int find_effective_bits(EBS_t *cur_ebs) {
     int *next_chroms;
     next_chroms = (int *) malloc((nb_chroms / 2) * sizeof (int));
     int best_chrom_iteration = 0;
+    int best_chrom_counter;
     chrom_t best_chrom;
     best_chrom.position = (int *) malloc(nb_eb * sizeof (int));
     best_chrom.score = 100; // initail value
@@ -102,10 +103,18 @@ int find_effective_bits(EBS_t *cur_ebs) {
     }
 
     iter = 0;
+    best_chrom_counter=0;
     while (iter++ < NB_ITERATIONS) {
 #ifdef DEBUG_GENETIC
         printf("iteration %d ...\n\n", iter);
 #endif
+        /*
+         * check if best_chrom_counter is more than NB_UNCHANGED_ITERATION then break;
+         */
+        best_chrom_counter++;
+        if(best_chrom_counter > NB_UNCHANGED_ITERATION)
+            break;
+        
 
         /* 
          * evaluation 
@@ -122,6 +131,8 @@ int find_effective_bits(EBS_t *cur_ebs) {
                 best_chrom.score = chroms[i].score;
                 for (j = 0; j < chroms[i].nb_eb; j++)
                     best_chrom.position[j] = chroms[i].position[j];
+                // reset counter
+                best_chrom_counter = 0;
             } //
         }
 
@@ -160,17 +171,17 @@ int find_effective_bits(EBS_t *cur_ebs) {
     for (i = 0; i < cur_ebs->nb_bits; i++) {
         cur_ebs->bits[i] = best_chrom.position[i];
     }
-    
+
     /*
      * free allocated memories
      */
-    for(i=0; i<nb_chroms; i++)
+    for (i = 0; i < nb_chroms; i++)
         free(chroms[i].position);
     free(chroms);
     free(best_chrom.position);
     free(next_chroms);
     free(bit_vector);
-    
+
     return best_chrom_iteration;
 }
 
@@ -213,7 +224,7 @@ float get_normal_variance(int *data, int num) {
     norm_var = norm_var_sum / num;
 
     free(normal_data);
-    
+
     return norm_var;
 }
 
@@ -452,7 +463,7 @@ chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
     free(ret_chrom);
     free(bit_vector);
     free(bit_vector_chroms);
-    
+
 }
 
 void dump_chrom(chrom_t _chrom) {

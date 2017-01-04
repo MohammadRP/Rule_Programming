@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         int nb_ebit, iter;
         int ret, sum, avg;
 
-        for (nb_ebit = 0; nb_ebit < 15; nb_ebit++) {
+        for (nb_ebit = 1; nb_ebit < 16; nb_ebit++) {
             
             /**
              * Clear 
