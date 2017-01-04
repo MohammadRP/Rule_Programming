@@ -30,9 +30,6 @@ extern "C" {
     //#define DEBUG_GENETIC
 
 
-    /* General Parameters *************************************************** */
-#define NB_BITS_EBS1  6
-#define NB_BITS_EBS2  14
 
     /* MC-SBC Parameters **************************************************** */
 #define threshold_factor_wr 0.9
@@ -42,7 +39,7 @@ extern "C" {
     /* Genetic Parameters *************************************************** */
 #define nb_chroms     16
 #define nb_iterations 100
-#define nb_mutation   max((0.2 * nb_ebit * nb_chroms), 1)
+#define nb_mutation   max((0.1 * nb_ebit * nb_chroms), 1)
 
 
 #define max(a,b) \

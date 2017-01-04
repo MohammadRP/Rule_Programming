@@ -138,6 +138,13 @@ int * index_str_to_int(char *index_str, int *nb_id) {
     char **str_id;
     str_id = (char **) malloc(pow(3, len) * sizeof (char *));
     str_id[num++] = strdup(index_str);
+    
+    if(len == 0){
+        *nb_id = 1;
+        int *id = (int *) malloc(sizeof (int));
+        id[0] = 0;
+        return id;
+    }
 
     for (i = 0; i < num;) {
         char *sample = str_id[i];
@@ -172,7 +179,14 @@ int * index_str_to_int(char *index_str, int *nb_id) {
     return id;
 }
 
-#if 1
+void dump_ebs(EBS_t ebs, int ebs_id) {
+    int i;
+    printf("EBS %d: ( ", ebs_id);
+    for (i = 0; i < ebs.nb_bits; i++) {
+        printf("%-3d ", ebs.bits[i]);
+    }
+    printf(")\n");
+}
 
 void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs) {
 
@@ -261,7 +275,10 @@ void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs) {
     }
 
     printf("------------------------------------------\n");
-    //    n_dump_chrom(*chrom);
+    printf("number of subsets=%-6d ", nb_subset);
+    dump_ebs(ebs[0], 0);
+    printf("lookup table size=%-6d ", nb_lookup_entries);
+    dump_ebs(ebs[1], 1);
     printf("binth     = %d\n", binth);
     printf("nb_dup    = %d\n", dup);
     printf("dup_ratio = %f\n", dup_ratio);
@@ -277,4 +294,3 @@ void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs) {
     }
     free(subsets);
 }
-#endif

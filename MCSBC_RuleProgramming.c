@@ -40,7 +40,7 @@ void generate_selection_factor(void);
 void select_effective_bits(EBS_t *ebs, uint8_t nb_ebs);
 
 void rule_programming_mc_sbc(EBS_t *ebss, int nb_ebs) {
-    printf("Starting MC_SBC rule programming ...\n");
+    printf("\n\nStarting MC_SBC rule programming ...\n");
 
     // Get Wildcard Ratio
     get_wildcard_ratio();
@@ -68,10 +68,10 @@ void rule_programming_mc_sbc(EBS_t *ebss, int nb_ebs) {
 #ifdef DEBUG_MCSBC
     printf("selection factor generated.\n");
 #endif
-    
+
     select_effective_bits(ebss, nb_ebs);
 
-    printf("Done.\n\n");
+    printf("Done.\n");
 }
 
 void get_wildcard_ratio(void) {
@@ -289,6 +289,10 @@ void select_effective_bits(EBS_t *ebs, uint8_t nb_ebs) {
                     && independence_index[bit0][bit1] < independence_index_threshold) {
                 // Append Ri , Rj to current EBS;
                 ebs[ebs_index].bits[ebs[ebs_index].top++] = bit0;
+                if (ebs[ebs_index].top >= ebs[ebs_index].nb_bits) { // if nb_bits is odd
+                    bit_vector[bit0] = 1;
+                    break;
+                }
                 ebs[ebs_index].bits[ebs[ebs_index].top++] = bit1;
                 // Mark Ri , Rj as used;
                 bit_vector[bit0] = 1;

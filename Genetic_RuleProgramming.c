@@ -29,7 +29,7 @@ int bit_mask[RULE_LEN];
  * Rule Programming via genetic algorithm ----------------------------------------------------
  */
 void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
-    printf("Starting Genetic rule programming ...\n");
+    printf("\n\nStarting Genetic rule programming ...\n");
 
     /*
      * Initialize bit mask
@@ -42,7 +42,8 @@ void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
     /*
      * find first ebs
      */
-    find_effective_bits(&ebs[0]);
+    if (ebs[0].nb_bits != 0)
+        find_effective_bits(&ebs[0]);
 
     /*
      * mark ebs[0].bits as used in bit mask
@@ -54,9 +55,10 @@ void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
     /*
      * find second ebs
      */
-    find_effective_bits(&ebs[1]);
+    if (ebs[1].nb_bits != 0)
+        find_effective_bits(&ebs[1]);
 
-    printf("Done.\n\n");
+    printf("Done.\n");
 }
 
 void find_effective_bits(EBS_t *cur_ebs) {

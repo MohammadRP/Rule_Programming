@@ -24,20 +24,21 @@ extern "C" {
 #define ALG_GENETIC 2
 
     char *input_file = NULL;
+    int nb_ebit0 = -1, nb_ebit1 = -1;
     int alg = ALG_GENETIC | ALG_MCSBC;
     int nb_rules;
     rule_t *rules;
     rule_str_t *rules_str;
 
     void usage(char *filename) {
-        printf("Usage: %s -f filename [-h]\n", filename);
+        printf("Usage: %s -f filename -n nb_ebit0,nb_ebit1 [-a alg] [-h]\n", filename);
         exit(EXIT_FAILURE);
     }
 
     void parse_args(int argc, char **argv) {
         int c;
         opterr = 0;
-        while ((c = getopt(argc, argv, "f:a:h")) != -1) {
+        while ((c = getopt(argc, argv, "f:a:n:h")) != -1) {
             switch (c) {
                 case 'f':
                     input_file = strdup(optarg);
@@ -53,6 +54,9 @@ extern "C" {
                         printf("Supported algorithms: mcsbc & genetic & all\n");
                         exit(EXIT_FAILURE);
                     }
+                    break;
+                case 'n':
+                    sscanf(optarg, "%d,%d", &nb_ebit0, &nb_ebit1);
                     break;
                 case '?':
                 case 'h':
@@ -74,6 +78,10 @@ extern "C" {
             printf("can not read from %s\n", input_file);
             exit(EXIT_FAILURE);
         }
+        if (nb_ebit0 < 0 || nb_ebit1 < 0) {
+            printf("nb_ebits does not specified\n");
+            usage(argv[0]);
+        } //
     }
 
     void dump_rule(rule_t rule) {
@@ -549,17 +557,17 @@ extern "C" {
 
     void init_ebs(EBS_t *ebs, int nb_ebs) {
         int i;
-        
+
         // EBS 0
-        ebs[0].nb_bits = NB_BITS_EBS1;
+        ebs[0].nb_bits = nb_ebit0;
         ebs[0].bits = (int *) malloc(
                 ebs[0].nb_bits * sizeof (int));
         for (i = 0; i < ebs[0].nb_bits; i++)
             ebs[0].bits[i] = 0;
         ebs[0].top = 0;
-        
+
         // EBS 1
-        ebs[1].nb_bits = NB_BITS_EBS2;
+        ebs[1].nb_bits = nb_ebit1;
         ebs[1].bits = (int *) malloc(
                 ebs[1].nb_bits * sizeof (int));
         for (i = 0; i < ebs[1].nb_bits; i++)
