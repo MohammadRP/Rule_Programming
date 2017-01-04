@@ -37,9 +37,12 @@ extern "C" {
 #define threshold_factor_ii 0.9
 
     /* Genetic Parameters *************************************************** */
-#define NB_CHROMS     (4 * (int)((RULE_LEN / (nb_eb * 8)) + 1))
-#define NB_ITERATIONS 100
-#define NB_MUTATION   max((0.1 * nb_ebit * nb_chroms), 1)
+#define NB_CHROMS       (4 * (int)((RULE_LEN / (nb_eb * 8)) + 1))
+#define NB_ITERATIONS   100
+#define NB_MUTATION     max((0.1 * nb_ebit * nb_chroms), 1)
+#define NORM_VAR
+#define GEN_ALPHA       5
+#define GEN_BETA        1
 
 
 #define max(a,b) \

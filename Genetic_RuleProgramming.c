@@ -65,11 +65,11 @@ void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
 void find_effective_bits(EBS_t *cur_ebs) {
     int nb_eb = cur_ebs->nb_bits;
     nb_chroms = NB_CHROMS; // should be after than nb_eb
-    
+
     int i, j, iter;
     chrom_t *chroms;
     int *next_chroms;
-    next_chroms = (int *) malloc((nb_chroms/2) * sizeof (int));
+    next_chroms = (int *) malloc((nb_chroms / 2) * sizeof (int));
     chrom_t best_chrom;
     best_chrom.score = 0; // initail value
 
@@ -130,7 +130,7 @@ void find_effective_bits(EBS_t *cur_ebs) {
 #endif
     }
 #if 0
-    evaluate(rules_str, &best_chrom, false);
+    m_evaluate(rules_str, &best_chrom, true);
 #endif
 
     for (i = 0; i < cur_ebs->nb_bits; i++) {
@@ -153,8 +153,37 @@ float get_variance(int *data, int num) {
     return var;
 }
 
+/*
+ * normal_data = data / nb_rules 
+ * normal_data[i] is the ratio of rules in the i'th subset
+ */
+float get_normal_variance(int *data, int num) {
+    int i;
+    float norm_sum = 0;
+    float norm_avg = 0;
+    float norm_var = 0;
+    float norm_var_sum = 0;
+
+    float *normal_data = (float *) malloc(num * sizeof (float));
+    for (i = 0; i < num; i++)
+        normal_data[i] = ((float) data[i]) / nb_rules;
+
+    for (i = 0; i < num; i++)
+        norm_sum += normal_data[i];
+
+    norm_avg = norm_sum / num;
+    for (i = 0; i < num; i++)
+        norm_var_sum += (normal_data[i] - norm_avg) * (normal_data[i] - norm_avg);
+    norm_var = norm_var_sum / num;
+    return norm_var;
+}
+
 float fitness_function(float variance, float dup_ratio) {
     return (100 / (dup_ratio + (variance / nb_rules)));
+}
+
+float normal_fitness_function(float standard_deviation, float dup_ratio) {
+    return 1 / (GEN_ALPHA * standard_deviation + GEN_BETA * dup_ratio);
 }
 
 void m_evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result) {
@@ -217,9 +246,15 @@ void m_evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result) {
 
     } // end for(i=0; i<nb_rules; i++)
 
-    float var = get_variance(nb_next_level_rules, nb_grp);
     float dup_ratio = dup / (float) nb_rules;
+#ifndef NORM_VAR
+    float var = get_variance(nb_next_level_rules, nb_grp);
     chrom->score = fitness_function(var, dup_ratio);
+#else
+    /* normal fitness function uses standard deviation instead of variance */
+    float var = get_normal_variance(nb_next_level_rules, nb_grp);
+    chrom->score = normal_fitness_function(sqrt(var), dup_ratio);
+#endif
 
     if (show_result) {
         dump_chrom(*chrom);
