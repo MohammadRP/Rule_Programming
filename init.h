@@ -542,6 +542,8 @@ extern "C" {
 #endif
             i++;
         }
+        if (line != NULL)
+            free(line);
 
         // convert rules to string --------------------
         rules_str = (rule_str_t *) malloc(nb_rules * sizeof (rule_str_t));
@@ -553,6 +555,11 @@ extern "C" {
 #endif
         }
 
+    }
+
+    void free_mem(void) {
+        free(rules);
+        free(rules_str);
     }
 
     void init_ebs(EBS_t *ebs, int nb_ebs) {
@@ -573,6 +580,11 @@ extern "C" {
         for (i = 0; i < ebs[1].nb_bits; i++)
             ebs[1].bits[i] = 0;
         ebs[1].top = 0;
+    }
+
+    void free_ebs(EBS_t *ebs, int nb_ebs) {
+        free(ebs[0].bits);
+        free(ebs[1].bits);
     }
 
 #ifdef __cplusplus

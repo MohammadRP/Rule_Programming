@@ -138,8 +138,8 @@ int * index_str_to_int(char *index_str, int *nb_id) {
     char **str_id;
     str_id = (char **) malloc(pow(3, len) * sizeof (char *));
     str_id[num++] = strdup(index_str);
-    
-    if(len == 0){
+
+    if (len == 0) {
         *nb_id = 1;
         int *id = (int *) malloc(sizeof (int));
         id[0] = 0;
@@ -175,6 +175,13 @@ int * index_str_to_int(char *index_str, int *nb_id) {
         }
         id[i] = index_int;
     }
+    
+    /*
+     * free allocated memories
+     */
+    for (i = 0; i < num; i++)
+        free(str_id[i]);
+    free(str_id);
 
     return id;
 }
@@ -286,6 +293,11 @@ void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs) {
     //    printf("score     = %f\n", chrom->score);
     printf("------------------------------------------\n");
 
+    /*
+     * free allocated memories
+     */
+    free(table_index);
+    free(subset_index);
     for (i = 0; i < nb_subset; i++) {
         for (j = 0; j < subsets[i].nb_tables; j++) {
             free(subsets[i].lookup_tables[j].entries);

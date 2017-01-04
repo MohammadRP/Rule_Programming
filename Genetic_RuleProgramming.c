@@ -71,6 +71,7 @@ void find_effective_bits(EBS_t *cur_ebs) {
     int *next_chroms;
     next_chroms = (int *) malloc((nb_chroms / 2) * sizeof (int));
     chrom_t best_chrom;
+    best_chrom.position = (int *) malloc(nb_eb * sizeof (int));
     best_chrom.score = 100; // initail value
 
     // initialize chroms
@@ -103,21 +104,37 @@ void find_effective_bits(EBS_t *cur_ebs) {
         printf("iteration %d ...\n\n", iter);
 #endif
 
-        // evaluation
+        /* 
+         * evaluation 
+         */
         for (i = 0; i < nb_chroms; i++) {
             m_evaluate(rules_str, &chroms[i], false);
-            if (chroms[i].score < best_chrom.score)
-                best_chrom = chroms[i];
+            /*
+             * if chroms[i] is better than best_chrom copy it to best_chrom
+             */
+            if (chroms[i].score < best_chrom.score) {
+                best_chrom.id = chroms[i].id;
+                best_chrom.nb_eb = chroms[i].nb_eb;
+                best_chrom.score = chroms[i].score;
+                for (j = 0; j < chroms[i].nb_eb; j++)
+                    best_chrom.position[j] = chroms[i].position[j];
+            } //
         }
 
-        // selection
+        /* 
+         * selection
+         */
         m_select(chroms, next_chroms);
 
-        // reproduction
+        /* 
+         * reproduction 
+         */
         //m_reproduce(chroms);
 
-        // crossover & mutation
-        chroms = m_crossover_mutation(chroms, next_chroms);
+        /* 
+         * crossover & mutation 
+         */
+        m_crossover_mutation(chroms, next_chroms);
 
 #ifdef DUMP_CHROMS
         for (i = 0; i < nb_chroms; i++)
@@ -133,9 +150,22 @@ void find_effective_bits(EBS_t *cur_ebs) {
     m_evaluate(rules_str, &best_chrom, true);
 #endif
 
+    /*
+     * copy best_chrom to ebs
+     */
     for (i = 0; i < cur_ebs->nb_bits; i++) {
         cur_ebs->bits[i] = best_chrom.position[i];
     }
+    
+    /*
+     * free allocated memories
+     */
+    for(i=0; i<nb_chroms; i++)
+        free(chroms[i].position);
+    free(chroms);
+    free(best_chrom.position);
+    free(next_chroms);
+    free(bit_vector);
 }
 
 float get_variance(int *data, int num) {
@@ -175,6 +205,9 @@ float get_normal_variance(int *data, int num) {
     for (i = 0; i < num; i++)
         norm_var_sum += (normal_data[i] - norm_avg) * (normal_data[i] - norm_avg);
     norm_var = norm_var_sum / num;
+
+    free(normal_data);
+    
     return norm_var;
 }
 
@@ -277,6 +310,7 @@ void m_evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result) {
     }
 
     free(nb_next_level_rules);
+    free(bit_pos);
 }
 
 void m_select(chrom_t *chroms, int *sel_chroms) {
@@ -392,10 +426,27 @@ chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
         ret_chrom[mut_i].position[mut_j] = mut_rand;
     }
 
+    /*
+     * copy ret_chrom to chroms
+     */
+    for (i = 0; i < nb_chroms; i++) {
+        chroms[i].id = ret_chrom[i].id;
+        chroms[i].nb_eb = ret_chrom[i].nb_eb;
+        chroms[i].score = ret_chrom[i].score;
+        for (j = 0; j < nb_ebit; j++) {
+            chroms[i].position[j] = ret_chrom[i].position[j];
+        }
+    }
+
+    /*
+     * free allocated memories
+     */
+    for (i = 0; i < nb_chroms; i++)
+        free(ret_chrom[i].position);
+    free(ret_chrom);
     free(bit_vector);
     free(bit_vector_chroms);
-    //free(chroms);
-    return ret_chrom;
+    
 }
 
 void dump_chrom(chrom_t _chrom) {

@@ -68,6 +68,11 @@ int main(int argc, char** argv) {
          * Evaluate Results
          */
         evaluate_new(rules_str, eff_bit_sets, 2);
+
+        /*
+         * Free Effective Bit Sets
+         */
+        free_ebs(eff_bit_sets, 2);
     }
 
     if (alg & ALG_GENETIC) {
@@ -99,7 +104,14 @@ int main(int argc, char** argv) {
          * Evaluate Results
          */
         evaluate_new(rules_str, eff_bit_sets, 2);
+
+        /*
+         * Free Effective Bit Sets
+         */
+        free_ebs(eff_bit_sets, 2);
     }
+    
+    free_mem();
 
     return (EXIT_SUCCESS);
 }
