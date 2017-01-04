@@ -71,7 +71,7 @@ void find_effective_bits(EBS_t *cur_ebs) {
     int *next_chroms;
     next_chroms = (int *) malloc((nb_chroms / 2) * sizeof (int));
     chrom_t best_chrom;
-    best_chrom.score = 0; // initail value
+    best_chrom.score = 100; // initail value
 
     // initialize chroms
     int *bit_vector;
@@ -106,7 +106,7 @@ void find_effective_bits(EBS_t *cur_ebs) {
         // evaluation
         for (i = 0; i < nb_chroms; i++) {
             m_evaluate(rules_str, &chroms[i], false);
-            if (chroms[i].score > best_chrom.score)
+            if (chroms[i].score < best_chrom.score)
                 best_chrom = chroms[i];
         }
 
@@ -183,7 +183,7 @@ float fitness_function(float variance, float dup_ratio) {
 }
 
 float normal_fitness_function(float standard_deviation, float dup_ratio) {
-    return 1 / (GEN_ALPHA * standard_deviation + GEN_BETA * dup_ratio);
+    return (GEN_ALPHA * standard_deviation + GEN_BETA * dup_ratio);
 }
 
 void m_evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result) {
@@ -282,11 +282,11 @@ void m_evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result) {
 void m_select(chrom_t *chroms, int *sel_chroms) {
     int i, j;
     for (i = 0; i < nb_chroms / 2; i++) {
-        float max = 0;
+        float min = 100;
         int sel = -1;
         for (j = 0; j < nb_chroms; j++) {
-            if (max < chroms[j].score) {
-                max = chroms[j].score;
+            if (min > chroms[j].score) {
+                min = chroms[j].score;
                 sel = j;
             }
         }
@@ -404,5 +404,5 @@ void dump_chrom(chrom_t _chrom) {
     for (i = 0; i < _chrom.nb_eb; i++) {
         printf("%-3d ", _chrom.position[i]);
     }
-    printf(")\tscore:%f\n", _chrom.score);
+    printf(")\nscore:%f\n", _chrom.score);
 }
