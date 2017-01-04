@@ -23,7 +23,7 @@ extern "C" {
     void evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result);
     void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs);
     void rule_programming_mc_sbc(EBS_t *ebss, int nb_ebs);
-    void rule_programming_genetic(EBS_t *ebs, int nb_ebs);
+    int rule_programming_genetic(EBS_t *ebs, int nb_ebs);
 
 
 #ifdef __cplusplus

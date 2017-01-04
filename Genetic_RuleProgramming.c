@@ -15,7 +15,7 @@
 #include "common.h"
 #include "RuleProgramming.h"
 
-void find_effective_bits(EBS_t *cur_ebs);
+int find_effective_bits(EBS_t *cur_ebs);
 float get_variance(int *data, int num);
 float fitness_function(float variance, float dup_ratio);
 void m_evaluate(rule_str_t *rules, chrom_t *chrom, bool show_result);
@@ -29,7 +29,7 @@ int nb_chroms;
 /*
  * Rule Programming via genetic algorithm ----------------------------------------------------
  */
-void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
+int rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
     printf("\n\nStarting Genetic rule programming ...\n");
 
     /*
@@ -44,7 +44,7 @@ void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
      * find first ebs
      */
     if (ebs[0].nb_bits != 0)
-        find_effective_bits(&ebs[0]);
+        return find_effective_bits(&ebs[0]);
 
     /*
      * mark ebs[0].bits as used in bit mask
@@ -60,9 +60,11 @@ void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
         find_effective_bits(&ebs[1]);
 
     printf("Done.\n");
+    
+    return 0;
 }
 
-void find_effective_bits(EBS_t *cur_ebs) {
+int find_effective_bits(EBS_t *cur_ebs) {
     int nb_eb = cur_ebs->nb_bits;
     nb_chroms = NB_CHROMS; // should be after than nb_eb
 
@@ -70,6 +72,7 @@ void find_effective_bits(EBS_t *cur_ebs) {
     chrom_t *chroms;
     int *next_chroms;
     next_chroms = (int *) malloc((nb_chroms / 2) * sizeof (int));
+    int best_chrom_iteration = 0;
     chrom_t best_chrom;
     best_chrom.position = (int *) malloc(nb_eb * sizeof (int));
     best_chrom.score = 100; // initail value
@@ -113,6 +116,7 @@ void find_effective_bits(EBS_t *cur_ebs) {
              * if chroms[i] is better than best_chrom copy it to best_chrom
              */
             if (chroms[i].score < best_chrom.score) {
+                best_chrom_iteration = iter;
                 best_chrom.id = chroms[i].id;
                 best_chrom.nb_eb = chroms[i].nb_eb;
                 best_chrom.score = chroms[i].score;
@@ -166,6 +170,8 @@ void find_effective_bits(EBS_t *cur_ebs) {
     free(best_chrom.position);
     free(next_chroms);
     free(bit_vector);
+    
+    return best_chrom_iteration;
 }
 
 float get_variance(int *data, int num) {
