@@ -269,7 +269,8 @@ void m_reproduce(chrom_t *chrom) {
 }
 
 chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
-    int i, mut_i, mut_j, mut_rand;
+    int i, j;
+    int mut_i, mut_j, mut_rand;
     int nb_ebit = chroms[0].nb_eb;
 
     chrom_t * ret_chrom;
@@ -280,9 +281,9 @@ chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
                 ret_chrom[i].nb_eb * sizeof (int));
     }
 
-    int *bit_vector;
-    bit_vector = (int *) malloc((nb_chroms / 2) * sizeof (int));
-    memset(bit_vector, 0, (nb_chroms / 2) * sizeof (int));
+    int *bit_vector_chroms;
+    bit_vector_chroms = (int *) malloc((nb_chroms / 2) * sizeof (int));
+    memset(bit_vector_chroms, 0, (nb_chroms / 2) * sizeof (int));
 
     for (i = 0; i < (nb_chroms / 2) / 2; i++) {
         int sel1, sel2;
@@ -291,12 +292,12 @@ chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
             sel2 = rand() % (nb_chroms / 2);
             if (sel1 == sel2)
                 continue;
-            if (bit_vector[sel1] != 0 || bit_vector[sel2] != 0)
+            if (bit_vector_chroms[sel1] != 0 || bit_vector_chroms[sel2] != 0)
                 continue;
             break;
         }
-        bit_vector[sel1] = 1;
-        bit_vector[sel2] = 1;
+        bit_vector_chroms[sel1] = 1;
+        bit_vector_chroms[sel2] = 1;
 
         sel1 = next_chrom[sel1];
         sel2 = next_chrom[sel2];
@@ -333,18 +334,27 @@ chrom_t * m_crossover_mutation(chrom_t *chroms, int *next_chrom) {
                 &chroms[sel2].position[part1_len], part2_len * sizeof (int));
     }
 
+    int *bit_vector = (int *) malloc(RULE_LEN * sizeof (int));
+    memset(bit_vector, 0, RULE_LEN * sizeof (int));
+    for (i = 0; i < nb_chroms; i++) {
+        for (j = 0; j < ret_chrom[i].nb_eb; j++) {
+            bit_vector[ret_chrom[i].position[j]] = 1;
+        }
+    }
+
     for (i = 0; i < nb_mutation; i++) {
         mut_i = rand() % nb_chroms;
         mut_j = rand() % nb_ebit;
 
         mut_rand = rand() % RULE_LEN;
-        while (bit_mask[mut_rand] != 0)
+        while (bit_mask[mut_rand] != 0 || bit_vector[mut_rand] != 0)
             mut_rand = rand() % RULE_LEN;
 
         ret_chrom[mut_i].position[mut_j] = mut_rand;
     }
 
     free(bit_vector);
+    free(bit_vector_chroms);
     //free(chroms);
     return ret_chrom;
 }
