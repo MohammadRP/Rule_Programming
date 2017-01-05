@@ -195,7 +195,7 @@ void dump_ebs(EBS_t ebs, int ebs_id) {
     printf(")\n");
 }
 
-void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs) {
+void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs, float *ret_rep_ratio, int *ret_binth) {
 
     int i, j, k;
     int r;
@@ -292,6 +292,12 @@ void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs) {
     //    printf("variance  = %f\n", var);
     //    printf("score     = %f\n", chrom->score);
     printf("------------------------------------------\n");
+    
+    /*
+     * set ret values
+     */
+    *ret_rep_ratio = dup_ratio;
+    *ret_binth = binth;
 
     /*
      * free allocated memories
