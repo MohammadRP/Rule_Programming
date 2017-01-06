@@ -41,7 +41,7 @@ extern "C" {
 #define NB_ITERATIONS   100
 #define NB_MUTATION     max((0.1 * nb_ebit * nb_chroms), 1)
 #define NORM_VAR
-#define GEN_ALPHA       1
+#define GEN_ALPHA       100
 #define GEN_BETA        1
 
 
