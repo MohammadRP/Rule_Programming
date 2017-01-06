@@ -43,8 +43,8 @@ int main(int argc, char** argv) {
         /*
          * Initialize Effective Bit Sets
          */
-        EBS_t eff_bit_sets[2];
-        init_ebs(eff_bit_sets, 2);
+        EBS_t eff_bit_sets[3];
+        init_ebs(eff_bit_sets, 3);
 
         /*
          * Get Start Time of Execution
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
         /*
          * Start MC-SBC
          */
-        rule_programming_mc_sbc(eff_bit_sets, 2);
+        rule_programming_mc_sbc(eff_bit_sets, 3);
 
         /*
          * Get End Time of Execution and Calculate Elapsed Time
@@ -67,20 +67,30 @@ int main(int argc, char** argv) {
         /*
          * Evaluate Results
          */
-        evaluate_new(rules_str, eff_bit_sets, 2);
+        evaluate_new(rules_str, eff_bit_sets, 2, false);
+        EBS_t *eff_bit_sets_2 = (EBS_t *) malloc(2 * sizeof (EBS_t));
+        eff_bit_sets_2[0] = eff_bit_sets[0];
+        eff_bit_sets_2[1] = eff_bit_sets[2];
+        evaluate_new(rules_str, eff_bit_sets_2, 2, false);
+        
+        /*
+         * Write results to output file
+         */
+        dump_results(eff_bit_sets);
 
         /*
          * Free Effective Bit Sets
          */
-        free_ebs(eff_bit_sets, 2);
+        free_ebs(eff_bit_sets, 3);
+        free(eff_bit_sets_2);
     }
 
     if (alg & ALG_GENETIC) {
         /*
          * Initialize Effective Bit Sets
          */
-        EBS_t eff_bit_sets[2];
-        init_ebs(eff_bit_sets, 2);
+        EBS_t eff_bit_sets[3];
+        init_ebs(eff_bit_sets, 3);
 
         /*
          * Get Start Time of Execution
@@ -90,7 +100,7 @@ int main(int argc, char** argv) {
         /*
          * Start Genetic
          */
-        rule_programming_genetic(eff_bit_sets, 2);
+        rule_programming_genetic(eff_bit_sets, 3);
 
         /*
          * Get End Time of Execution and Calculate Elapsed Time
@@ -103,14 +113,24 @@ int main(int argc, char** argv) {
         /*
          * Evaluate Results
          */
-        evaluate_new(rules_str, eff_bit_sets, 2);
+        evaluate_new(rules_str, eff_bit_sets, 2, false);
+        EBS_t *eff_bit_sets_2 = (EBS_t *) malloc(2 * sizeof (EBS_t));
+        eff_bit_sets_2[0] = eff_bit_sets[0];
+        eff_bit_sets_2[1] = eff_bit_sets[2];
+        evaluate_new(rules_str, eff_bit_sets_2, 2, false);
+        
+        /*
+         * Write results to output file
+         */
+        dump_results(eff_bit_sets);
 
         /*
          * Free Effective Bit Sets
          */
         free_ebs(eff_bit_sets, 2);
+        free(eff_bit_sets_2);
     }
-    
+
     free_mem();
 
     return (EXIT_SUCCESS);

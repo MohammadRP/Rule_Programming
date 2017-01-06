@@ -24,7 +24,8 @@ extern "C" {
 #define ALG_GENETIC 2
 
     char *input_file = NULL;
-    int nb_ebit0 = -1, nb_ebit1 = -1;
+    char *output_file = NULL;
+    int nb_ebit0 = -1, nb_ebit1 = -1, nb_ebit2 = -1;
     int alg = ALG_GENETIC | ALG_MCSBC;
     int nb_rules;
     rule_t *rules;
@@ -38,7 +39,7 @@ extern "C" {
     void parse_args(int argc, char **argv) {
         int c;
         opterr = 0;
-        while ((c = getopt(argc, argv, "f:a:n:h")) != -1) {
+        while ((c = getopt(argc, argv, "f:a:n:o:h")) != -1) {
             switch (c) {
                 case 'f':
                     input_file = strdup(optarg);
@@ -48,15 +49,16 @@ extern "C" {
                         alg = ALG_MCSBC;
                     else if (strcmp(optarg, "genetic") == 0)
                         alg = ALG_GENETIC;
-                    else if (strcmp(optarg, "all") == 0)
-                        alg = (ALG_GENETIC | ALG_MCSBC);
                     else {
-                        printf("Supported algorithms: mcsbc & genetic & all\n");
+                        printf("Supported algorithms: mcsbc & genetic\n");
                         exit(EXIT_FAILURE);
                     }
                     break;
                 case 'n':
-                    sscanf(optarg, "%d,%d", &nb_ebit0, &nb_ebit1);
+                    sscanf(optarg, "%d,%d,%d", &nb_ebit0, &nb_ebit1, &nb_ebit2);
+                    break;
+                case 'o':
+                    output_file = strdup(optarg);
                     break;
                 case '?':
                 case 'h':
@@ -78,10 +80,52 @@ extern "C" {
             printf("can not read from %s\n", input_file);
             exit(EXIT_FAILURE);
         }
-        if (nb_ebit0 < 0 || nb_ebit1 < 0) {
+
+        if (output_file == NULL) {
+            printf("please specify output file name\n");
+            usage(argv[0]);
+        }
+        if (access(output_file, F_OK) == 0) {
+            printf("%s already exist\n", output_file);
+            exit(EXIT_FAILURE);
+        }
+
+        if (nb_ebit0 < 0 || nb_ebit1 < 0 || nb_ebit2 < 0) {
             printf("nb_ebits does not specified\n");
             usage(argv[0]);
         } //
+    }
+
+    void dump_results(EBS_t *ebss) {
+        int i;
+        FILE *fp;
+        fp = fopen(output_file, "w");
+        fprintf(fp, "nb_ebit_subset = %d\n", ebss[0].nb_bits);
+        fprintf(fp, "subset: ");
+        for (i = 0; i < ebss[0].nb_bits; i++) {
+            if (i == ebss[0].nb_bits - 1)
+                fprintf(fp, "%d\n", ebss[0].bits[i]);
+            else
+                fprintf(fp, "%d,", ebss[0].bits[i]);
+        }
+        
+        fprintf(fp, "nb_ebit_lookuptable0 = %d\n", ebss[1].nb_bits);
+        fprintf(fp, "lookup_table0: ");
+        for (i = 0; i < ebss[1].nb_bits; i++) {
+            if (i == ebss[1].nb_bits - 1)
+                fprintf(fp, "%d\n", ebss[1].bits[i]);
+            else
+                fprintf(fp, "%d,", ebss[1].bits[i]);
+        }
+        
+        fprintf(fp, "nb_ebit_lookuptable1 = %d\n", ebss[2].nb_bits);
+        fprintf(fp, "lookup_table1: ");
+        for (i = 0; i < ebss[2].nb_bits; i++) {
+            if (i == ebss[2].nb_bits - 1)
+                fprintf(fp, "%d\n", ebss[2].bits[i]);
+            else
+                fprintf(fp, "%d,", ebss[2].bits[i]);
+        }
     }
 
     void dump_rule(rule_t rule) {
@@ -580,11 +624,20 @@ extern "C" {
         for (i = 0; i < ebs[1].nb_bits; i++)
             ebs[1].bits[i] = 0;
         ebs[1].top = 0;
+
+        // EBS 1
+        ebs[2].nb_bits = nb_ebit2;
+        ebs[2].bits = (int *) malloc(
+                ebs[2].nb_bits * sizeof (int));
+        for (i = 0; i < ebs[2].nb_bits; i++)
+            ebs[2].bits[i] = 0;
+        ebs[2].top = 0;
     }
 
     void free_ebs(EBS_t *ebs, int nb_ebs) {
         free(ebs[0].bits);
         free(ebs[1].bits);
+        free(ebs[2].bits);
     }
 
 #ifdef __cplusplus

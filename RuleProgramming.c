@@ -175,7 +175,7 @@ int * index_str_to_int(char *index_str, int *nb_id) {
         }
         id[i] = index_int;
     }
-    
+
     /*
      * free allocated memories
      */
@@ -195,7 +195,7 @@ void dump_ebs(EBS_t ebs, int ebs_id) {
     printf(")\n");
 }
 
-void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs) {
+void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs, bool dump) {
 
     int i, j, k;
     int r;
@@ -239,6 +239,9 @@ void evaluate_new(rule_str_t *rules, EBS_t *ebs, int nb_ebs) {
             subset_index[i] = rules[r].value[ebs[0].bits[i]];
         }
         subset_index[ebs[0].nb_bits] = '\0';
+
+        if (dump)
+            printf("SUBSET: %s\n", subset_index);
 
         // collect table index from rule
         for (i = 0; i < ebs[1].nb_bits; i++) {

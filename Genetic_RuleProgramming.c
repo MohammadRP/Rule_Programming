@@ -58,6 +58,20 @@ void rule_programming_genetic(EBS_t *ebs, int nb_ebs) {
      */
     if (ebs[1].nb_bits != 0)
         find_effective_bits(&ebs[1]);
+    
+    /*
+     * mark ebs[1].bits as used in bit mask
+     */
+    for (i = 0; i < ebs[1].nb_bits; i++) {
+        bit_mask[ebs[1].bits[i]] = 1;
+    }
+    
+    /*
+     * find third ebs
+     */
+    if (ebs[2].nb_bits != 0)
+        find_effective_bits(&ebs[2]);
+    
 
     printf("Done.\n");
 }
